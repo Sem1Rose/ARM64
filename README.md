@@ -1,6 +1,6 @@
 # WHERE EXE
 
-![where_exe](res/where exe.jpg)
+![where_exe](res/where%20exe.jpg)
 <br>
 nuh uh not this time fellow developer, you can [build](#RUNNING) it tho
 
