@@ -2,20 +2,20 @@
 .global _start
 
 _start:
-    sub     sp, sp, #3
+    sub     sp, sp, #16
     mov     x0, sp
     bl      read
     bl      ascii_to_u64    // returns: x0: u64
-    add     sp, sp, #3
+    add     sp, sp, #16
 
     bl      factorial       // returns: x0: u64
 
-    sub     sp, sp, #21
+    sub     sp, sp, #32
     bl      u64_to_ascii    // returns: x0: string address, x1: string length
     bl      write
-    add     sp, sp, #21
+    add     sp, sp, #32
 
-    mov     x0, #0
+    mov     x0, xzr
     b       exit
 
 
@@ -39,8 +39,7 @@ ascii_to_u64_loop:
     madd    x3, x3, x6, x2
 
     sub     x5, x5, #1
-    cmp     x5, #0
-    bne     ascii_to_u64_loop
+    cbnz    x5, ascii_to_u64_loop
 ascii_to_u64_end:
     mov     x0, x3
     ret
@@ -68,21 +67,18 @@ u64_to_ascii:               // x2: new num, x3: remainder, x4: string address (s
     mov     x2, 0xA         // Line feed
     strb    w2, [x4], #-1
     mov     x1, #1
-    cmp     x0, xzr
-    beq     add_digit
+    cbz     x0, add_digit
 get_next_digit:
     udiv    x2, x0, x5
     msub    x3, x2, x5, x0
     mov     x0, x2
 add_digit:
-    // add     x3, x3, #0x30   // digits start at code 0x30 in ascii
     add     x3, x3, '0'
     strb    w3, [x4], #-1
     add     x1, x1, #1
 
-    cmp     x0, xzr
-    bne     get_next_digit
-    
+    cbnz     x0, get_next_digit
+
     add     x0, x4, #1      // return the address of the string
     ret
 
@@ -91,7 +87,7 @@ add_digit:
 read:
     mov     x2, #3          // arbitrary limit of 2 digits
     mov     x1, x0
-    mov     x0, #1    
+    mov     x0, #1
     mov     w8, #63
     svc     #0
     mov     x0, x1          // undo
@@ -101,7 +97,7 @@ read:
 write:
     mov     x2, x1
     mov     x1, x0
-    mov     x0, #1    
+    mov     x0, #1
     mov     w8, #64
     svc     #0
     mov     x0, x1          // undo
